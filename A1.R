@@ -8,9 +8,6 @@ VC = VC[,c(1:3,sort(sample(4:50,25,replace=FALSE)),
            sort(sample(51:65,8,replace=FALSE)))]
 write.csv(VC, "FIT3152A1Data_Kai.csv", row.names = FALSE)
 
-# Extract Belarus data
-VC_BLR <- VC[VC$Country == "BLR", ]
-
 # Dimensions
 dim(VC)
 
@@ -62,5 +59,50 @@ lapply(VC[, non_num_vars, drop = FALSE], function(x) {
 })
 
 # Q2: Focus country vs all other countries as a group (independent of time)
+
+# Extract Belarus data and all other countries into 2 data frames
+VC_BLR <- VC[VC$Country == "BLR", ]
+VC_Others <- VC[VC$Country != "BLR", ]
+
+# Sample sizes
+nrow(VC_BLR)
+nrow(VC_Others)
+
+# Proportion of total data that is Belarus
+nrow(VC_BLR) / nrow(VC)
+
+# Quick summaries
+summary(VC_BLR$Country)
+summary(VC_Others$Country)
+
+# Identify numeric variables
+num_vars <- sapply(VC, is.numeric)
+num_names <- names(VC)[num_vars]
+
+# Function to get summary stats for a data frame
+num_summary_fun <- function(df) {
+  data.frame(
+    variable = num_names,
+    mean = sapply(df[, num_names, drop = FALSE], mean, na.rm = TRUE),
+    median = sapply(df[, num_names, drop = FALSE], median, na.rm = TRUE),
+    sd = sapply(df[, num_names, drop = FALSE], sd, na.rm = TRUE)
+  )
+}
+
+BLR_num_summary    <- num_summary_fun(VC_BLR)
+Others_num_summary <- num_summary_fun(VC_Others)
+
+# Merge into one table with differences
+num_compare <- merge(
+  BLR_num_summary, Others_num_summary,
+  by = "variable", suffixes = c("_BLR", "_Others")
+)
+
+# Add mean difference (Belarus - Others)
+num_compare$mean_diff <- num_compare$mean_BLR - num_compare$mean_Others
+
+# View the largest differences in means
+num_compare[order(-abs(num_compare$mean_diff)), ]
+
 
 
