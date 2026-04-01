@@ -13,8 +13,6 @@ VC_BLR <- VC[VC$Country == "BLR", ]
 
 # Dimensions
 dim(VC)
-nrow(VC)
-ncol(VC)
 
 # Overall structure, variable classes, first values
 str(VC)
@@ -30,21 +28,6 @@ VC[VC < 0 & VC >= -5] <- NA
 sum(is.na(VC))
 mean(is.na(VC))
 
-# # Missing by variable (for a table or figure)
-# missing_by_var <- sapply(VC, function(x) sum(is.na(x)))
-# missing_prop_by_var <- sapply(VC, function(x) mean(is.na(x)))
-# 
-# missing_summary <- data.frame(
-#   variable = names(VC),
-#   n_missing = missing_by_var,
-#   prop_missing = missing_prop_by_var
-# )
-# 
-# # View largest amounts of missingness
-# missing_summary[order(-missing_summary$prop_missing), ]
-
-
-
 # ----- Identify numeric variables -----
 num_vars <- sapply(VC, is.numeric)
 
@@ -53,7 +36,7 @@ summary(VC[, num_vars])
 
 names(VC)
 
-# Detailed stats (mean, sd, quantiles) in one object
+# Detailed stats (mean, sd, quantiles)
 num_summary <- data.frame(
   variable = names(VC)[num_vars],
   mean = sapply(VC[, num_vars, drop = FALSE], mean, na.rm = TRUE),
@@ -67,17 +50,17 @@ num_summary <- data.frame(
 
 num_summary
 
-library(ggplot2)
+# Identify non-numeric variables (factor, character)
+non_num_vars <- !num_vars
 
-# Example: histogram of Age
-ggplot(VC, aes(x = Age)) +
-  geom_histogram(binwidth = 5, colour = "black", fill = "steelblue") +
-  theme_minimal()
+# Number of unique values
+lapply(VC[, non_num_vars, drop = FALSE], function(x) {
+  list(
+    class = class(x),
+    n_unique = length(unique(x))
+  )
+})
 
-# Example: barplot for a confidence variable treated as numeric but showing counts
-ggplot(VC, aes(x = factor(CGovernment))) +
-  geom_bar(fill = "steelblue") +
-  xlab("Confidence in Government (coded levels)") +
-  theme_minimal()
+# Q2: Focus country vs all other countries as a group (independent of time)
 
 
