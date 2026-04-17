@@ -180,5 +180,26 @@ best_blr$sig_preds
 for (cv in conf_cols) {
   cat("Trying:", cv, "\n")
   form <- as.formula(paste(cv, "~", paste(pred_cols, collapse = " + ")))
-  print(try(summary(lm(form, data = VC_BLR, na.action = na.omit)), silent = TRUE))
+  print(summary(lm(form, data = VC_BLR, na.action = na.omit)))
 }
+
+# ---- Q2c: Linear regression – Others ----
+others_lm <- lm_summary(VC_Others, conf_cols, pred_cols, 0.05/length(pred_cols))
+others_r2  <- data.frame(
+  conf_var = sapply(others_lm, `[[`, "conf_var"),
+  R2       = round(sapply(others_lm, `[[`, "r2"),     3),
+  Adj_R2   = round(sapply(others_lm, `[[`, "adj_r2"), 3)
+)
+others_r2[order(-others_r2$R2), ]
+
+# Print top predictors for the highest R² confidence variable
+best_others <- others_lm[[which.max(sapply(others_lm, `[[`, "r2"))]]
+cat("Best-predicted confidence var (Others):", best_others$conf_var,
+    "  R2 =", best_others$r2, "\n")
+best_others$sig_preds
+
+# Comparison table BLR vs Others R²
+r2_compare <- merge(blr_r2, others_r2, by = "conf_var", suffixes = c("_BLR", "_Others"))
+r2_compare$R2_diff <- r2_compare$R2_BLR - r2_compare$R2_Others
+r2_compare[order(-r2_compare$R2_BLR), ]
+
