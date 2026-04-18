@@ -161,7 +161,7 @@ lm_summary <- function(df, conf_cols, pred_cols, alpha = 0.05) {
   })
 }
 
-blr_lm  <- lm_summary(VC_BLR,conf_cols, pred_cols)
+blr_lm <- lm_summary(VC_BLR,conf_cols, pred_cols)
 
 # Compact R² table
 blr_r2 <- data.frame(
@@ -202,4 +202,108 @@ best_others$sig_preds
 r2_compare <- merge(blr_r2, others_r2, by = "conf_var", suffixes = c("_BLR", "_Others"))
 r2_compare$R2_diff <- r2_compare$R2_BLR - r2_compare$R2_Others
 r2_compare[order(-r2_compare$R2_BLR), ]
+
+# ============================================================
+# Q3: Focus country vs all other countries OVER TIME
+# ============================================================
+
+# Using Wave as time variable (more regular than Year)
+waves <- sort(unique(VC$Wave))
+years <- sort(unique(VC$Year))
+
+# ---- Q3a: Mean responses per Wave --------------------------
+# Compute wave-level means for all numeric variables, by group
+wave_means <- function(df, group_label) {
+  do.call(rbind, lapply(split(df, df$Wave), function(w) {
+    row <- c(Wave = w$Wave[1], Group = group_label,
+             sapply(w[, num_names, drop = FALSE], mean, na.rm = TRUE))
+    as.data.frame(t(row), stringsAsFactors = FALSE)
+  }))
+}
+
+str(all_waves$CEU)
+
+# Replace string "NaN" with NA, then convert to numeric for all numeric columns
+blr_waves    <- wave_means(VC_BLR,    "Belarus")
+blr_waves[, num_names] <- lapply(blr_waves[, num_names], as.numeric)
+others_waves <- wave_means(VC_Others, "Others")
+others_waves[, num_names] <- lapply(others_waves[, num_names], as.numeric)
+all_waves    <- rbind(blr_waves, others_waves)
+
+# For each variable, count how many waves have non-NAN values
+valid_vars <- sapply(num_names, function(v) {
+  sum(is.na(blr_waves[[v]])) >= 2   # TRUE if at least 2 waves with data
+})
+
+vars_to_test  <- names(valid_vars)[!valid_vars]    
+vars_excluded <- names(valid_vars)[valid_vars]
+
+vars_to_test
+vars_excluded
+
+VC_BLR_kw <- VC_BLR[, setdiff(names(VC_BLR), vars_excluded)]
+
+# Kruskal-Wallis test per variable for BLR across waves
+kw_blr <- lapply(vars_to_test, function(v) {
+  kt <- kruskal.test(VC_BLR_kw[[v]] ~ factor(VC_BLR$Wave))
+  data.frame(variable = v, chi_sq = kt$statistic, p = kt$p.value)
+})
+
+kw_blr_df <- do.call(rbind, kw_blr)
+kw_blr_df[order(kw_blr_df$p), ]
+
+# Same test for Others
+kw_others <- lapply(num_names, function(v) {
+  kt <- kruskal.test(VC_Others[[v]] ~ factor(VC_Others$Wave))
+  data.frame(variable = v, chi_sq = kt$statistic, p = kt$p.value)
+})
+kw_others_df <- do.call(rbind, kw_others)
+kw_others_df[order(kw_others_df$p), ]
+
+# --- Graphic Q3a: most interesting variable over time ----
+
+# Variables to plot (Lowest 2 p-values for BLR and Others respectively)
+vars_to_plot <- c("PolPetition", "PolScale", "ILReligion", "ICQIndependence")
+
+# Label for each variable (for cleaner facet titles)
+var_labels <- c(
+  PolPetition      = "Signing Petitions (Belarus top)",
+  PolScale         = "Political Scale (Belarus top)",
+  ILReligion       = "Importance of Religion (Others top)",
+  ICQIndependence  = "Child Quality: Independence (Others top)"
+)
+
+# Reshape to long format
+plot_df <- all_waves[, c("Wave", "Group", vars_to_plot)]
+plot_df <- pivot_longer(plot_df,
+                        cols      = all_of(vars_to_plot),
+                        names_to  = "variable",
+                        values_to = "value")
+plot_df$Wave     <- as.integer(plot_df$Wave)
+plot_df$value    <- as.numeric(plot_df$value)
+plot_df$variable <- factor(plot_df$variable,
+                           levels = vars_to_plot,
+                           labels = var_labels)
+
+# Plot
+ggplot(plot_df, aes(x = Wave, y = value, colour = Group, group = Group)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  facet_wrap(~ variable, scales = "free_y", ncol = 2) +
+  scale_x_continuous(breaks = unique(plot_df$Wave)) +
+  labs(
+    title    = "Mean Response by Wave: Belarus vs Others",
+    subtitle = "Top 2 most changed variables for each group",
+    x        = "Wave",
+    y        = "Mean Response",
+    colour   = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(strip.text = element_text(face = "bold"))
+
+
+
+
+
+
 
