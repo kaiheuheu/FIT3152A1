@@ -18,8 +18,8 @@ write.csv(VC, "FIT3152A1Data_Kai.csv", row.names = FALSE)
 # ============================================================
 
 # Dimensions + Structure
-dim(VC)
-str(VC)
+# dim(VC)
+# str(VC)
 
 # Replace all -ve values with NA
 VC[VC < 0 & VC >= -5] <- NA
@@ -42,7 +42,6 @@ num_summary <- data.frame(
   q75    = sapply(VC[, num_names, drop = FALSE], quantile, probs = 0.75, na.rm = TRUE),
   max    = sapply(VC[, num_names, drop = FALSE], max,       na.rm = TRUE)
 )
-num_summary
 
 # Non-numeric columns
 non_num_vars <- !num_vars
@@ -177,11 +176,11 @@ cat("Best-predicted confidence var (BLR):", best_blr$conf_var,
     "  R2 =", best_blr$r2, "\n")
 best_blr$sig_preds
 
-for (cv in conf_cols) {
-  cat("Trying:", cv, "\n")
-  form <- as.formula(paste(cv, "~", paste(pred_cols, collapse = " + ")))
-  print(summary(lm(form, data = VC_BLR, na.action = na.omit)))
-}
+# for (cv in conf_cols) {
+#   cat("Trying:", cv, "\n")
+#   form <- as.formula(paste(cv, "~", paste(pred_cols, collapse = " + ")))
+#   print(summary(lm(form, data = VC_BLR, na.action = na.omit)))
+# }
 
 # ---- Q2c: Linear regression – Others ----
 others_lm <- lm_summary(VC_Others, conf_cols, pred_cols, 0.05/length(pred_cols))
@@ -220,8 +219,6 @@ wave_means <- function(df, group_label) {
     as.data.frame(t(row), stringsAsFactors = FALSE)
   }))
 }
-
-str(all_waves$CEU)
 
 # Replace string "NaN" with NA, then convert to numeric for all numeric columns
 blr_waves    <- wave_means(VC_BLR,    "Belarus")
@@ -301,9 +298,121 @@ ggplot(plot_df, aes(x = Wave, y = value, colour = Group, group = Group)) +
   theme_minimal(base_size = 11) +
   theme(strip.text = element_text(face = "bold"))
 
+# ---- Q3b: R² per wave – how predictive power changes ----
+# For each wave, fit lm for each confidence variable; record R²
+
+r2_by_wave <- function(df, group_label, conf_cols, pred_cols, wave_means_df) {
+  do.call(rbind, lapply(split(df, df$Wave), function(w) {
+    wave_id <- w$Wave[1]
+    
+    # Find the row in wave_means_df corresponding to this wave and group
+    wave_row <- wave_means_df[wave_means_df$Wave == wave_id &
+                                wave_means_df$Group == group_label, ]
+    
+    # Keep only pred_cols that are non-NA in this wave's means
+    valid_preds <- pred_cols[sapply(pred_cols, function(p) {
+      p %in% names(wave_row) && !is.na(wave_row[[p]])
+    })]
+    
+    do.call(rbind, lapply(conf_cols, function(cv) {
+      # Also skip if response variable is all NA in this wave
+      if (sum(!is.na(w[[cv]])) < length(valid_preds) + 2) {
+        return(data.frame(Wave = wave_id, Group = group_label,
+                          conf_var = cv, R2 = NA))
+      }
+      
+      formula <- as.formula(paste(cv, "~", paste(valid_preds, collapse = " + ")))
+      fit <- tryCatch(
+        lm(formula, data = w, na.action = na.omit),
+        error = function(e) NULL
+      )
+      
+      if (is.null(fit)) return(data.frame(Wave = wave_id, Group = group_label,
+                                          conf_var = cv, R2 = NA))
+      
+      data.frame(Wave     = wave_id,
+                 Group    = group_label,
+                 conf_var = cv,
+                 R2       = summary(fit)$r.squared)
+    }))
+  }))
+}
+
+blr_r2w    <- r2_by_wave(VC_BLR,    "Belarus", conf_cols, pred_cols, blr_waves)
+others_r2w <- r2_by_wave(VC_Others, "Others",  conf_cols, pred_cols, others_waves)
+r2w_all    <- rbind(blr_r2w, others_r2w)
 
 
+# Show overall trend
+aggregate(R2 ~ Wave + Group, data = r2w_all, FUN = mean)
 
+# Top 3 confidence variables with greatest R² variability across waves in BLR
+r2_var_blr <- tapply(blr_r2w$R2, blr_r2w$conf_var, var, na.rm = TRUE)
+top_conf_3  <- names(head(sort(r2_var_blr, decreasing = TRUE), 3))
+top_conf_3
 
+# Use all conf_vars, not just top_conf
+plot_heat <- r2w_all
+plot_heat$Wave <- as.factor(plot_heat$Wave)
 
+ggplot(plot_heat, aes(x = Wave, y = conf_var, fill = R2)) +
+  geom_tile(colour = "white", linewidth = 0.5) +
+  geom_text(aes(label = ifelse(is.na(R2), "N/A", round(R2, 2))),
+            size = 2.8) +
+  scale_fill_gradient(low = "#f7f7f7", high = "#2166ac",
+                      na.value = "grey90", limits = c(0, 0.31)) +
+  facet_wrap(~ Group, ncol = 2) +
+  labs(title    = "R² Heatmap: Model Fit Across Confidence Variables and Waves",
+       subtitle = "Darker = higher R²; N/A = no data for that wave",
+       x = "Wave", y = "Confidence Variable", fill = "R²") +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.y = element_text(size = 8),
+        strip.text  = element_text(face = "bold"))
 
+# Top predictors per wave for BLR using valid_preds
+top_preds_by_wave <- function(df, group_label, conf_var, pred_cols, wave_means_df, n_top = 3) {
+  do.call(rbind, lapply(split(df, df$Wave), function(w) {
+    wave_id <- w$Wave[1]
+    
+    # Find the row in wave_means_df for this wave and group
+    wave_row <- wave_means_df[wave_means_df$Wave == wave_id &
+                                wave_means_df$Group == group_label, ]
+    
+    # Keep only pred_cols that are non-NA in this wave's means
+    valid_preds <- pred_cols[sapply(pred_cols, function(p) {
+      p %in% names(wave_row) && !is.na(wave_row[[p]])
+    })]
+    
+    formula <- as.formula(paste(conf_var, "~", paste(valid_preds, collapse = " + ")))
+    fit <- tryCatch(
+      lm(formula, data = w, na.action = na.omit),
+      error = function(e) NULL
+    )
+    if (is.null(fit)) return(NULL)
+    
+    s    <- summary(fit)
+    coefs <- coef(s)[-1, , drop = FALSE]   # drop intercept
+    
+    # Sort by absolute t-value, take top n
+    top <- head(sort(abs(coefs[, "t value"]), decreasing = TRUE), n_top)
+    
+    data.frame(
+      Wave      = wave_id,
+      Group     = group_label,
+      conf_var  = conf_var,
+      predictor = names(top),
+      abs_t     = as.numeric(top)
+    )
+  }))
+}
+
+# Top predictors per wave for each of the top 3 confidence variables
+blr_top_preds <- do.call(rbind, lapply(top_conf_3, function(cv) {
+  top_preds_by_wave(VC_BLR, "Belarus", cv, pred_cols, blr_waves)
+}))
+
+others_top_preds <- do.call(rbind, lapply(top_conf_3, function(cv) {
+  top_preds_by_wave(VC_Others, "Others", cv, pred_cols, others_waves)
+}))
+
+all_top_preds <- rbind(blr_top_preds, others_top_preds)
