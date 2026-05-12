@@ -82,8 +82,7 @@ WD.test = WD[-train.row,]
 
 library(rpart)        # Decision Tree
 library(e1071)        # Naive Bayes
-library(ipred)        # Bagging
-library(adabag)       # Boosting
+library(adabag)       # Bagging + Boosting
 library(randomForest) # Random Forest
 
 # Predictor variables — exclude all three class variables
@@ -99,6 +98,11 @@ train_AF <- WD.train[!is.na(WD.train$CArmedForces), c(predictors, "CArmedForces"
 train_MC <- WD.train[!is.na(WD.train$CMajComp),     c(predictors, "CMajComp")]
 train_UN <- WD.train[!is.na(WD.train$CUnions),      c(predictors, "CUnions")]
 
+# Ensure complete cases for adabag methods (they don’t like NAs)
+train_AF_adb <- train_AF[complete.cases(train_AF), ]
+train_MC_adb <- train_MC[complete.cases(train_MC), ]
+train_UN_adb <- train_UN[complete.cases(train_UN), ]
+
 # ---------- Decision Tree ----------
 dt_AF <- rpart(make_formula("CArmedForces"), data = train_AF, method = "class")
 dt_MC <- rpart(make_formula("CMajComp"),     data = train_MC, method = "class")
@@ -110,14 +114,15 @@ nb_MC <- naiveBayes(make_formula("CMajComp"),     data = train_MC)
 nb_UN <- naiveBayes(make_formula("CUnions"),      data = train_UN)
 
 # ---------- Bagging ----------
-bag_AF <- bagging(make_formula("CArmedForces"), data = train_AF, nbagg = 10)
-bag_MC <- bagging(make_formula("CMajComp"),     data = train_MC, nbagg = 10)
-bag_UN <- bagging(make_formula("CUnions"),      data = train_UN, nbagg = 10)
+set.seed(33739374)
+bag_AF <- bagging(CArmedForces ~ ., data = train_AF_adb, mfinal = 10)
+bag_MC <- bagging(CMajComp     ~ ., data = train_MC_adb, mfinal = 10)
+bag_UN <- bagging(CUnions      ~ ., data = train_UN_adb, mfinal = 10)
 
 # ---------- Boosting ----------
-boost_AF <- boosting(make_formula("CArmedForces"), data = train_AF, mfinal = 25)
-boost_MC <- boosting(make_formula("CMajComp"),     data = train_MC, mfinal = 25)
-boost_UN <- boosting(make_formula("CUnions"),      data = train_UN, mfinal = 25)
+boost_AF <- boosting(CArmedForces ~ ., data = train_AF_adb, mfinal = 10)
+boost_MC <- boosting(CMajComp     ~ ., data = train_MC_adb, mfinal = 10)
+boost_UN <- boosting(CUnions      ~ ., data = train_UN_adb, mfinal = 10)
 
 # ---------- Random Forest ----------
 rf_AF <- randomForest(make_formula("CArmedForces"), data = train_AF, na.action = na.omit)
@@ -229,4 +234,140 @@ preds_UN <- list("Decision Tree" = pred_dt_UN,
 results_AF <- print_results("CArmedForces", test_AF$CArmedForces, preds_AF)
 results_MC <- print_results("CMajComp",     test_MC$CMajComp,     preds_MC)
 results_UN <- print_results("CUnions",      test_UN$CUnions,      preds_UN)
+
+# ============================================================
+# Q6: ROC curves and AUC
+# ============================================================
+
+library(pROC)
+
+# --- 1. Build per-target test sets (same idea as Q5) ---
+test_AF <- WD.test[!is.na(WD.test$CArmedForces), c(predictors, "CArmedForces")]
+test_MC <- WD.test[!is.na(WD.test$CMajComp),     c(predictors, "CMajComp")]
+test_UN <- WD.test[!is.na(WD.test$CUnions),      c(predictors, "CUnions")]
+
+# Helper: convert factor 0/1 to numeric 0/1
+to01 <- function(x) as.numeric(as.character(x))
+
+# ------------------------------------------------------------
+# 2. Get predicted probabilities for class "1" (High confidence)
+# ------------------------------------------------------------
+
+## ----- CArmedForces -----
+
+# Decision Tree
+prob_dt_AF <- predict(dt_AF,  test_AF, type = "prob")[, "1"]
+
+# Naive Bayes
+prob_nb_AF <- predict(nb_AF,  test_AF, type = "raw")[, "1"]
+
+# Bagging (adabag)
+pred_bag_AF <- predict(bag_AF, newdata = test_AF)
+prob_bag_AF <- pred_bag_AF$prob[, "1"]
+
+# Boosting (adabag)
+pred_boost_AF <- predict(boost_AF, newdata = test_AF)
+prob_boost_AF <- pred_boost_AF$prob[, "1"]
+
+# Random Forest
+prob_rf_AF <- predict(rf_AF,  test_AF, type = "prob")[, "1"]  # [web:34][web:30]
+
+
+## ----- CMajComp -----
+
+prob_dt_MC <- predict(dt_MC, test_MC, type = "prob")[, "1"]
+prob_nb_MC <- predict(nb_MC, test_MC, type = "raw")[, "1"]
+
+pred_bag_MC <- predict(bag_MC, newdata = test_MC)
+prob_bag_MC <- pred_bag_MC$prob[, "1"]
+
+pred_boost_MC <- predict(boost_MC, newdata = test_MC)
+prob_boost_MC <- pred_boost_MC$prob[, "1"]
+
+prob_rf_MC <- predict(rf_MC, test_MC, type = "prob")[, "1"]    # [web:34][web:30]
+
+
+## ----- CUnions -----
+
+prob_dt_UN <- predict(dt_UN, test_UN, type = "prob")[, "1"]
+prob_nb_UN <- predict(nb_UN, test_UN, type = "raw")[, "1"]
+
+pred_bag_UN <- predict(bag_UN, newdata = test_UN)
+prob_bag_UN <- pred_bag_UN$prob[, "1"]
+
+pred_boost_UN <- predict(boost_UN, newdata = test_UN)
+prob_boost_UN <- pred_boost_UN$prob[, "1"]
+
+prob_rf_UN <- predict(rf_UN, test_UN, type = "prob")[, "1"]    # [web:34][web:30]
+
+# ============================================================
+# 3. ROC curves + AUC for each class variable (pROC)
+# ============================================================
+
+# Helper to plot all 5 ROC curves on one plot and return AUCs
+plot_roc_set <- function(y_true, probs_list, title_text) {
+  # y_true must be numeric 0/1
+  cols <- c("red", "blue", "darkgreen", "orange", "purple")
+  ltys <- c(1, 2, 3, 4, 5)
+  
+  i <- 1
+  aucs <- data.frame(Model = names(probs_list), AUC = NA_real_)
+  
+  for (name in names(probs_list)) {
+    roc_obj <- roc(y_true, probs_list[[name]], quiet = TRUE)   # [web:24][web:28]
+    if (i == 1) {
+      plot(roc_obj,
+           col = cols[i], lty = ltys[i],
+           main = title_text,
+           print.auc = FALSE, legacy.axes = TRUE)
+    } else {
+      plot(roc_obj, col = cols[i], lty = ltys[i], add = TRUE)
+    }
+    aucs$AUC[aucs$Model == name] <- as.numeric(auc(roc_obj))   # [web:24][web:26]
+    i <- i + 1
+  }
+  abline(a = 0, b = 1, lty = 3, col = "grey")
+  legend("bottomright",
+         legend = names(probs_list),
+         col = cols, lty = ltys, cex = 0.8)
+  return(aucs)
+}
+
+# ---------- CArmedForces ----------
+probs_AF <- list("Decision Tree" = prob_dt_AF,
+                 "Naive Bayes"   = prob_nb_AF,
+                 "Bagging"       = prob_bag_AF,
+                 "Boosting"      = prob_boost_AF,
+                 "Random Forest" = prob_rf_AF)
+
+auc_AF <- plot_roc_set(to01(test_AF$CArmedForces),
+                       probs_AF,
+                       "ROC — Confidence in Armed Forces (CArmedForces)")
+
+# ---------- CMajComp ----------
+probs_MC <- list("Decision Tree" = prob_dt_MC,
+                 "Naive Bayes"   = prob_nb_MC,
+                 "Bagging"       = prob_bag_MC,
+                 "Boosting"      = prob_boost_MC,
+                 "Random Forest" = prob_rf_MC)
+
+auc_MC <- plot_roc_set(to01(test_MC$CMajComp),
+                       probs_MC,
+                       "ROC — Confidence in Major Companies (CMajComp)")
+
+# ---------- CUnions ----------
+probs_UN <- list("Decision Tree" = prob_dt_UN,
+                 "Naive Bayes"   = prob_nb_UN,
+                 "Bagging"       = prob_bag_UN,
+                 "Boosting"      = prob_boost_UN,
+                 "Random Forest" = prob_rf_UN)
+
+auc_UN <- plot_roc_set(to01(test_UN$CUnions),
+                       probs_UN,
+                       "ROC — Confidence in Unions (CUnions)")
+
+# View AUC tables
+auc_AF
+auc_MC
+auc_UN
 
