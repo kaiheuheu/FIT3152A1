@@ -30,13 +30,13 @@ for (cv in class_vars) {
 }
 
 # Descriptions of predictor attributes (non-class columns)
-predictor_vars <- setdiff(names(WD), c("Country", "Wave", class_vars))
-summary(WD[, predictor_vars])
+predictor_vars <- setdiff(names(WD_full), c("Country", "Wave", class_vars))
+summary(WD_full[, predictor_vars])
 
 # class balance visually
 par(mfrow = c(1, length(class_vars)))
 for (cv in class_vars) {
-  barplot(prop.table(table(WD[[cv]])) * 100,
+  barplot(prop.table(table(WD_full[[cv]])) * 100,
           main = cv,
           xlab = "Confidence",
           ylab = "Percentage (%)",
@@ -54,16 +54,16 @@ par(mfrow = c(1, 1))
 WD_full[WD_full < 0] <- NA
 
 # convert to factors (for classifiers)
-WD_full$CArmedForces <- as.factor(WD$CArmedForces)
-WD_full$CMajComp     <- as.factor(WD$CMajComp)
-WD_full$CUnions      <- as.factor(WD$CUnions)
+WD_full$CArmedForces <- as.factor(WD_full$CArmedForces)
+WD_full$CMajComp     <- as.factor(WD_full$CMajComp)
+WD_full$CUnions      <- as.factor(WD_full$CUnions)
 
 # convert sex to factor (categorical predictor)
-WD_full$Sex <- as.factor(WD$Sex)
+WD_full$Sex <- as.factor(WD_full$Sex)
 
 # drop Country column
 length(unique(WD_full$Country))
-WD <- WD_full[, !names(WD) %in% c("Country")]
+WD <- WD_full[, !names(WD_full) %in% c("Country")]
 
 summary(WD)
 
