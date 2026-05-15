@@ -5,11 +5,12 @@
 # ---------- Setup & data creation ---------------------------
 
 rm(list = ls())
+.rs.restartR()
 set.seed(33739374) # Your Student ID is the random seed
 WD_full = read.csv("WVSBinaryExtract.csv")
 selected_cols = c(sample(3:49, 30),sample(50:63, 3))
 WD_full = WD_full[c(1:2, selected_cols)]
-WD_full = WD_full[sample(nrow(WD), 20000, replace = FALSE),]
+WD_full = WD_full[sample(nrow(WD_full), 20000, replace = FALSE),]
 
 summary(WD_full)
 
@@ -21,7 +22,7 @@ class_vars <- c("CArmedForces", "CMajComp", "CUnions")
 
 # Proportion of High vs Low for each variable
 for (cv in class_vars) {
-  tbl <- table(WD[[cv]])
+  tbl <- table(WD_full[[cv]])
   prop <- prop.table(tbl)
   cat(sprintf("\n%s:\n", cv))
   print(tbl)
@@ -622,7 +623,7 @@ cat("\n=== Performance Comparison ===\n")
 print(comparison, row.names = FALSE)
 
 # ============================================================
-# Q11: Artificial Neural Network for Temporal Prediction
+# Q11: Artificial Neural Network Classifier
 # ============================================================
 
 library(neuralnet)
@@ -630,155 +631,201 @@ library(dplyr)
 
 # --- Step 1: Identify Country with Most Observations ---
 
-# Assuming your data has a 'Country' variable (check your actual column name)
-# If it's Country_ISO, Country_Name, or similar, adjust accordingly
-country_counts <- WD %>%
-  group_by(Country) %>%  # Replace 'Country' with your actual column name
+country_counts <- WD_full %>%
+  group_by(Country) %>%
   summarise(n = n()) %>%
   arrange(desc(n))
 
 print(country_counts)
 
-# Select country with most observations
 top_country <- country_counts$Country[1]
-cat("\nCountry with most observations:", top_country, 
+cat("\nSelected country:", top_country, 
     "with", country_counts$n[1], "observations\n")
 
 # --- Step 2: Filter Data for Top Country ---
 
-WD_country <- WD %>%
-  filter(Country == top_country) %>%  # Replace 'Country' with actual column
-  filter(!is.na(Wave))  # Ensure Wave data exists for temporal comparison
+WD_country <- WD_full %>%
+  filter(Country == top_country) %>%
+  filter(!is.na(Wave))
 
-# --- Step 3: Data Preprocessing for ANN ---
+# --- Step 3: Data Preprocessing ---
 
-# Select class variable (using CArmedForces as example - choose based on Q8 insights)
-# Use the class variable with best performance from earlier analysis
 target_var <- "CArmedForces"
 
-# Remove low-importance attributes identified in Q8
-low_importance <- c("ACTEnvOrg", "ACTHumanitarian", "ACTProfessional", 
+low_importance <- c("ACTEnvOrg", "ACTHumanitarian", "ACTProfessional",
                     "Sex", "ACTArtsEd", "ICQDetermination", "ICQUnselfishness")
 
-# Keep only high/moderate importance predictors
 predictors_ann <- setdiff(predictors_reduced, low_importance)
 
-# Create dataset with complete cases
 ann_data <- WD_country %>%
   select(all_of(c(predictors_ann, target_var, "Wave"))) %>%
-  na.omit()  # ANNs cannot handle missing values
+  na.omit()
 
-# Convert target to numeric (0/1) if factor
-if(is.factor(ann_data[[target_var]])) {
-  ann_data[[target_var]] <- as.numeric(as.character(ann_data[[target_var]]))
-}
+cat("\nAvailable waves:", sort(unique(ann_data$Wave)), "\n")
+cat("Total observations:", nrow(ann_data), "\n")
 
-# --- Step 4: Normalize Numeric Predictors (Critical for ANNs) ---
+# --- Step 4: Normalize Numeric Predictors ---
 
-# Identify numeric columns (exclude binary 0/1 variables)
+normalize <- function(x) (x - min(x)) / (max(x) - min(x))
+
 numeric_cols <- sapply(ann_data[, predictors_ann], function(x) {
   is.numeric(x) && length(unique(x)) > 2
 })
-
-# Min-max normalization to [0,1]
-normalize <- function(x) {
-  return((x - min(x)) / (max(x) - min(x)))
-}
 
 for(col in names(numeric_cols)[numeric_cols]) {
   ann_data[[col]] <- normalize(ann_data[[col]])
 }
 
-# --- Step 5: Split by Wave for Temporal Comparison ---
+# --- Step 5: 70/30 Train/Test Split (Mixed Waves) ---
 
-# Train on earlier waves, test on later wave(s)
-waves <- sort(unique(ann_data$Wave))
-cat("\nAvailable waves:", waves, "\n")
+set.seed(33739374)
+train.row <- sample(1:nrow(ann_data), 0.7 * nrow(ann_data))
 
-# Use first N-1 waves for training, last wave for testing
-train_waves <- waves[-length(waves)]
-test_wave <- waves[length(waves)]
+country_train <- ann_data[train.row, ]
+country_test  <- ann_data[-train.row, ]
 
-train_ann <- ann_data %>% filter(Wave %in% train_waves)
-test_ann <- ann_data %>% filter(Wave == test_wave)
-
-cat(sprintf("\nTraining on waves %s (%d obs)\n", 
-            paste(train_waves, collapse=", "), nrow(train_ann)))
-cat(sprintf("Testing on wave %s (%d obs)\n", test_wave, nrow(test_ann)))
+cat(sprintf("\nTraining set: %d observations\n", nrow(country_train)))
+cat(sprintf("Test set:     %d observations\n", nrow(country_test)))
+cat("\nWave distribution in training set:\n")
+print(table(country_train$Wave))
+cat("\nWave distribution in test set:\n")
+print(table(country_test$Wave))
 
 # --- Step 6: Build ANN Formula ---
 
-# neuralnet requires explicit formula (cannot use ~ .)
-formula_ann <- as.formula(paste(target_var, "~", 
-                                paste(predictors_ann, collapse = " + ")))
+formula_ann <- as.formula(paste(
+  target_var, "~", paste(predictors_ann, collapse = " + ")
+))
 
 # --- Step 7: Train ANN ---
 
-set.seed(33739374)
-
 ann_model <- neuralnet(
   formula_ann,
-  data = train_ann[, c(predictors_ann, target_var)],
-  hidden = c(5, 3),        # Two hidden layers: 5 neurons, then 3
-  threshold = 0.01,        # Convergence threshold
-  stepmax = 1e6,           # Max training iterations
-  linear.output = FALSE,   # Use sigmoid activation (classification)
-  err.fct = "ce",          # Cross-entropy error
-  act.fct = "logistic"     # Logistic activation function
+  data        = country_train[, c(predictors_ann, target_var)],
+  hidden      = c(5, 3),
+  threshold   = 0.01,
+  stepmax     = 1e6,
+  linear.output = FALSE,
+  err.fct     = "ce",
+  act.fct     = "logistic"
 )
 
 # Plot network architecture
-plot(ann_model, rep = "best", 
-     main = paste("ANN for", target_var, "in", top_country))
+plot(ann_model, rep = "best",
+     main = paste("ANN Architecture for", target_var, "-", top_country))
 
-# --- Step 8: Make Predictions ---
+# --- Step 8: Training Performance ---
 
-# Predictions on training set
-pred_train_prob <- compute(ann_model, train_ann[, predictors_ann])$net.result
-pred_train <- ifelse(pred_train_prob > 0.5, 1, 0)
+pred_train_prob <- compute(ann_model, country_train[, predictors_ann])$net.result
+pred_train      <- ifelse(pred_train_prob[, 2] > 0.5, 1, 0)
 
-# Predictions on test set (latest wave)
-pred_test_prob <- compute(ann_model, test_ann[, predictors_ann])$net.result
-pred_test <- ifelse(pred_test_prob > 0.5, 1, 0)
-
-# --- Step 9: Evaluate Performance ---
-
-# Training performance
-train_cm <- table(Actual = train_ann[[target_var]], Predicted = pred_train)
+train_cm  <- table(Actual = country_train[[target_var]], Predicted = pred_train)
 train_acc <- sum(diag(train_cm)) / sum(train_cm)
 
-# Test performance (temporal validation)
-test_cm <- table(Actual = test_ann[[target_var]], Predicted = pred_test)
-test_acc <- sum(diag(test_cm)) / sum(test_cm)
+TP_tr <- train_cm["1","1"]; FP_tr <- train_cm["0","1"]; FN_tr <- train_cm["1","0"]
+train_precision <- TP_tr / (TP_tr + FP_tr)
+train_recall    <- TP_tr / (TP_tr + FN_tr)
+train_f1        <- 2 * train_precision * train_recall / (train_precision + train_recall)
 
-cat("\n=== ANN Performance ===\n")
-cat("\nTraining Confusion Matrix:\n")
+cat("\n=== Q11: ANN Training Performance ===\n")
 print(train_cm)
-cat(sprintf("Training Accuracy: %.4f\n", train_acc))
+cat(sprintf("Accuracy:  %.4f\n", train_acc))
+cat(sprintf("Precision: %.4f\n", train_precision))
+cat(sprintf("Recall:    %.4f\n", train_recall))
+cat(sprintf("F1-score:  %.4f\n", train_f1))
 
-cat("\nTest Confusion Matrix (Wave %s):\n", test_wave)
-print(test_cm)
-cat(sprintf("Test Accuracy: %.4f\n", test_acc))
-
-# Calculate F1 for test set
-TP <- test_cm["1", "1"]
-FP <- test_cm["0", "1"]
-FN <- test_cm["1", "0"]
-precision <- TP / (TP + FP)
-recall <- TP / (TP + FN)
-f1 <- 2 * precision * recall / (precision + recall)
-
-cat(sprintf("Test F1-score: %.4f\n", f1))
-
-# --- Step 10: ROC and AUC for Test Set ---
+# ============================================================
+# Q12: Temporal Evaluation - Performance Across Two Waves
+# ============================================================
 
 library(pROC)
 
-roc_ann <- roc(test_ann[[target_var]], pred_test_prob[,1], quiet = TRUE)
-auc_ann <- as.numeric(auc(roc_ann))
+# --- Step 1: Identify the Two Waves with Most Test Observations ---
 
-plot(roc_ann, main = paste("ANN ROC Curve -", target_var, "Wave", test_wave),
-     legacy.axes = TRUE)
-cat(sprintf("Test AUC: %.4f\n", auc_ann))
+wave_counts <- table(country_test$Wave)
+print(wave_counts)
 
+top_waves <- as.integer(names(sort(wave_counts, decreasing = TRUE)[1:2]))
+cat(sprintf("\nTop 2 waves by test observations: Wave %d (%d obs), Wave %d (%d obs)\n",
+            top_waves[1], wave_counts[top_waves[1]],
+            top_waves[2], wave_counts[top_waves[2]]))
+
+# --- Step 2: Split Test Set by Wave ---
+
+test_w1 <- country_test[country_test$Wave == top_waves[1], ]
+test_w2 <- country_test[country_test$Wave == top_waves[2], ]
+
+# --- Step 3: Predict on Each Wave ---
+
+evaluate_wave <- function(model, test_data, predictors, target, wave_label) {
+  
+  probs <- compute(model, test_data[, predictors])$net.result
+  preds <- ifelse(probs[, 2] > 0.5, 1, 0)
+  
+  cm        <- table(Actual = test_data[[target]], Predicted = preds)
+  acc       <- sum(diag(cm)) / sum(cm)
+  TP        <- cm["1","1"]; FP <- cm["0","1"]; FN <- cm["1","0"]
+  precision <- TP / (TP + FP)
+  recall    <- TP / (TP + FN)
+  f1        <- 2 * precision * recall / (precision + recall)
+  
+  roc_obj <- roc(test_data[[target]], probs[, 2], quiet = TRUE)
+  auc_val <- as.numeric(auc(roc_obj))
+  
+  cat(sprintf("\n=== Wave %s ===\n", wave_label))
+  print(cm)
+  cat(sprintf("Accuracy:  %.4f\n", acc))
+  cat(sprintf("Precision: %.4f\n", precision))
+  cat(sprintf("Recall:    %.4f\n", recall))
+  cat(sprintf("F1-score:  %.4f\n", f1))
+  cat(sprintf("AUC:       %.4f\n", auc_val))
+  
+  return(list(roc = roc_obj, auc = auc_val, f1 = f1, probs = probs))
+}
+
+results_w1 <- evaluate_wave(ann_model, test_w1, predictors_ann, 
+                            target_var, top_waves[1])
+results_w2 <- evaluate_wave(ann_model, test_w2, predictors_ann, 
+                            target_var, top_waves[2])
+
+# --- Step 4: ROC Curves Side by Side ---
+
+par(mfrow = c(1, 2))
+
+plot(results_w1$roc, main = paste("Wave", top_waves[1]),
+     legacy.axes = TRUE, col = "steelblue", lwd = 2,
+     xlab = "False Positive Rate", ylab = "True Positive Rate")
+abline(a = 0, b = 1, lty = 2, col = "gray")
+legend("bottomright", 
+       legend = sprintf("AUC = %.4f", results_w1$auc),
+       col = "steelblue", lwd = 2, bty = "n")
+
+plot(results_w2$roc, main = paste("Wave", top_waves[2]),
+     legacy.axes = TRUE, col = "tomato", lwd = 2,
+     xlab = "False Positive Rate", ylab = "True Positive Rate")
+abline(a = 0, b = 1, lty = 2, col = "gray")
+legend("bottomright",
+       legend = sprintf("AUC = %.4f", results_w2$auc),
+       col = "tomato", lwd = 2, bty = "n")
+
+par(mfrow = c(1, 1))
+
+# --- Step 5: Combined ROC Plot ---
+
+plot(results_w1$roc, col = "steelblue", lwd = 2, legacy.axes = TRUE,
+     main = paste("ANN ROC Curves by Wave -", target_var),
+     xlab = "False Positive Rate", ylab = "True Positive Rate")
+plot(results_w2$roc, col = "tomato", lwd = 2, add = TRUE)
+abline(a = 0, b = 1, lty = 2, col = "gray")
+legend("bottomright",
+       legend = c(sprintf("Wave %d (AUC = %.4f)", top_waves[1], results_w1$auc),
+                  sprintf("Wave %d (AUC = %.4f)", top_waves[2], results_w2$auc)),
+       col = c("steelblue", "tomato"), lwd = 2, bty = "n")
+
+# --- Step 6: Summary Table ---
+
+cat("\n=== Q12 Summary: ANN Performance Across Waves ===\n")
+cat(sprintf("%-12s %-10s %-10s\n", "Wave", "F1-Score", "AUC"))
+cat(sprintf("%-12s %-10.4f %-10.4f\n", top_waves[1], results_w1$f1, results_w1$auc))
+cat(sprintf("%-12s %-10.4f %-10.4f\n", top_waves[2], results_w2$f1, results_w2$auc))
 
