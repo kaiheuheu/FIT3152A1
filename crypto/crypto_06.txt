@@ -1,0 +1,68 @@
+Crypto Market Update: CFTC Clears Coinbase to Offer Global Crypto Perpetual Futures
+
+
+Written by Meagen Seatter
+Giann Liguid
+Edited by
+Charlotte McLeod
+Jun. 01, 2026 01:05PM PST
+
+INN Investing News Network
+
+Elsewhere in the crypto landscape, Binance's new traditional finance service will allow retail investors to purchase fractional slices of over 7,000 US equities and ETFs for as little as US$5.
+
+Here's a quick recap of the crypto landscape for Monday (June 1) as of 8:00 p.m. UTC.
+
+Get the latest insights on Bitcoin, Ether and altcoins, along with a round-up of key cryptocurrency market news.
+
+Bitcoin (BTC) was priced at US$71,390.67, trading 2.9 percent lower over the past 24 hours.
+
+Bitcoin price performance, June 1, 2026.
+
+Chart via TradingView.
+
+Simon-Peter Massabni, head of business development at XS.com, said short-term pressure on Bitcoin is keeping it in the US$73,000 to $74,000 range, driven primarily by nearly US$2.97 billion in outflows from US spot Bitcoin exchange-traded funds (ETFs) over 10 consecutive sessions. Additional pressure is coming from the macroeconomic environment, including elevated US treasury yields and a stable US dollar, which limit investor risk appetite.
+
+However, Massabni views this as a justified, short-term correction rather than confirmation of a long-term bearish trend, as the underlying structure has not completely deteriorated:
+
+"In a positive scenario, if ETF outflows stop and US yields cool more clearly, Bitcoin could gradually stabilize and recover toward the US$77,000 to 78,000 region. This would be a reasonable price area for a short-term rebound, reflecting an improvement in market sentiment, but it would not yet be enough to confirm a strong new uptrend.
+"Conversely, if ETFs continue to record outflows while the US dollar and treasury yields remain elevated, selling pressure could drag BTC back toward the US$70,000 region. If market sentiment worsens further or additional negative macro factors emerge, Bitcoin could test deeper levels around US$65,000 to US$66,000 before finding more stable demand."
+Ether (ETH) was priced at US$1,990.61, trading 0.4 percent lower over the last 24 hours.
+
+Altcoin price update
+XRP (XRP) was priced at US$1.29, trading 2.3 percent lower in 24 hours.
+Solana (SOL) was trading at US$80.74, trading 1.1 percent lower over the past 24 hours.
+Today's crypto news to know
+Coinbase secures CFTC approval to offer global crypto perpetual futures
+The Commodity Futures Trading Commission (CFTC) has greenlit Coinbase Global (NASDAQ:COIN) to offer crypto perpetual futures, making it the first US exchange granted access to the offshore derivatives market.
+
+The domestic exchange will connect American customers directly to Deribit, an offshore crypto options platform Coinbase acquired last year for US$2.9 billion. Perpetual futures operate as highly leveraged derivatives contracts with no expiration date, allowing traders to borrow capital and aggressively bet on future digital asset prices.
+
+While Coinbase has yet to finalize the specific assets it will offer, the CFTC has broadly cleared the platform to list any "digital commodity" perpetual contracts currently traded on Deribit. This category covers major tokens like Bitcoin, Ethereum and Solana, alongside highly volatile assets like Dogecoin.
+
+In a simultaneous development, the CFTC has also authorized prediction market Kalshi to launch the first American-born Bitcoin perpetual futures.
+
+Datavault AI signs framework for potential US$2 billion financing
+Datavault AI, a data‑driven web3 and artificial intelligence (AI) company focused on data monetization, credentialing, digital engagement and real‑world asset tokenization, has entered into a non‑binding agreement that lays out the framework for a potential US$2 billion structured financing.
+
+The prospective funding would come from an unnamed institutional investment fund that owns around $2 billion in fixed‑income assets; the money would be used as collateral in an asset‑backed structure.
+
+The funding would fuel Datavault AI’s push into digital asset infrastructure. In return, the counterparty would receive an exclusive global mandate to route its digital asset tokenization and blockchain projects through Datavault AI’s patented platform, effectively making Datavault AI the default tech stack for that fund’s tokenization efforts.
+
+Datavault AI’s platform is designed to turn data and real‑world assets into tokenized, revenue‑generating instruments, positioning the company at the intersection of AI, blockchain infrastructure and capital markets.
+
+Binance expands into US stock and ETF trading
+Binance has expanded into traditional finance with the launch of US stock and ETF trading directly on its platform.
+
+The new service grants users access to more than 7,000 US equities and ETFs alongside existing digital asset portfolios. The rollout features fractional trading capabilities, allowing retail investors to purchase slices of expensive public stocks for as little as US$5. The decision aligns the firm with competitors like Coinbase and the retail-focused brokerage Robinhood Markets (NASDAQ:HOOD), both of which already offer access to digital and traditional markets.
+
+Furthermore, the cryptocurrency exchange is offering round-the-clock, 24/5 equity trading, catering to growing retail demand for access to US markets outside the confines of standard Wall Street trading sessions.
+
+Sequans Communications abandons Bitcoin treasury strategy
+Sequans Communications (NYSE:SQNS) is pulling the plug on its Bitcoin corporate treasury strategy, announcing the redemption of all debt tied to its massive crypto acquisitions. The Paris-based semiconductor firm said it funded the total debt clearance by liquidating nearly 80 percent of its Bitcoin holdings over the past several months.
+
+Sequans originally launched its crypto playbook in June 2025, successfully raising US$384 million through debt and equity instruments to stockpile digital assets. The company rapidly accumulated 3,000 Bitcoin by the end of July 2025, but the pivot broke following a severe crypto market flash crash in mid-October.
+
+The firm subsequently dumped 970 BTC in November and offloaded another 1,025 BTC throughout the first quarter of 2026 to de-risk its balance sheet. During a recent Q1 earnings call, CEO Georges Karam definitively confirmed the company has no intention of continuing its corporate treasury strategy.
+
+Sequans currently holds roughly 658 fully unencumbered Bitcoin on its balance sheet, which it plans to steadily monetize over time as it refocuses entirely on its core semiconductor business.

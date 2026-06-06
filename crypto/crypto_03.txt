@@ -1,0 +1,96 @@
+Yahoo Finance
+
+What are the Best Cryptocurrencies to Buy in June?
+
+Sam Daodu
+Mon, June 1, 2026 at 5:30 AM GMT+10
+
+Quick Read
+June could be one of the most important months for crypto investors as regulatory progress, ETF adoption, and institutional capital converge to create a potentially bullish environment.
+
+Bitcoin, Ethereum, Solana, XRP, and Ondo Finance each offer unique investment opportunities tied to major trends, including institutional adoption, blockchain innovation, payment utility, and real-world asset tokenization.
+
+With prices still trading below previous highs and several major catalysts approaching, June may present a rare opportunity for investors to position themselves before broader market momentum returns.
+
+The White House set July 4 as its target for President Trump to sign the CLARITY Act into law, and SEC chair Paul Atkins has publicly urged Congress to pass the bill so the SEC and CFTC can begin implementation. The bill has already cleared the House of Representatives and the Senate Banking Committee, and is waiting on a full Senate vote. Analysts project major institutional flows into the crypto market once the bill becomes law.
+
+That makes June the last window before those flows start arriving. To build this list, we looked at institutional interest, real-world utility, regulatory clarity, and realistic upside heading into the second half of 2026. Bitcoin (CRYPTO: BTC), Ethereum (CRYPTO: ETH), Solana (CRYPTO: SOL), XRP (CRYPTO: XRP), and Ondo Finance (CRYPTO: ONDO) are the five that kept coming up..
+
+Why June Could Be a Defining Month for Crypto Investors
+
+The CLARITY Act deadline is not the only thing making June worth paying attention to. A Federal Reserve interest rate decision is scheduled for mid-June, and when the Fed signals stability, history shows investors tend to move money back into risk assets like crypto.
+
+Institutional adoption through ETFs is also strengthening in the background. Ethereum, Solana, and XRP now all have approved spot ETFs in the U.S., joining Bitcoin. That is four major assets with regulated on-ramps for institutional money. Bitcoin spot ETF inflows have started turning positive again after weeks of outflows, according to Coinglass. Institutional access to crypto has never been broader than it is right now.
+
+Bitcoin (BTC): The Market Leader Still Setting the Pace
+
+Bitcoin almost always moves first in crypto markets, and the rest of the asset class tends to follow. Right now, Bitcoin is trading about 42% below its all-time high. To a beginner, that might look like a red flag, but to an experienced investor, it looks like an entry point. Every time Bitcoin has pulled back this hard after a halving peak, it has eventually pushed higher before the cycle ended. That has not happened yet in this cycle.
+
+The most interesting thing right now is not the price but what is happening around it. Three Samsung affiliates just agreed to buy a 4% stake in Dunamu, the parent of South Korea's largest crypto exchange Upbit, for $408 million. The deal is scheduled to close on June 19. Samsung Securities, Samsung SDS, and Samsung Card do not commit that level of capital on speculation. Bitcoin may not be grabbing headlines at the moment, but it is still the asset that everything else prices off.
+
+Current Price: $73,440
+
+June 2026 Target: $78,000 to $84,000
+
+Year-End Target: $100,000 to $150,000
+
+Ethereum (ETH): Positioned for the Next Wave of Blockchain Adoption
+
+Most people think of Ethereum as just a cryptocurrency, however, it is really more of a foundation. DeFi, NFTs, stablecoins, and smart contracts mostly run on Ethereum's rails. The token itself has had a rough stretch, trading well below $2,100 for several weeks, but long-term holders do not appear to be bailing. On-chain data suggests they are adding.
+
+The Glamsterdam upgrade is targeting June and could meaningfully improve Ethereum's scaling. Spot Ethereum ETFs have also accumulated $12.05 billion in cumulative net inflows since launch, signaling steady institutional demand. ETH has been quiet lately, and that can change fast.
+
+Current Price: $2,012
+
+June 2026 Target: $2,100 to $2,500
+
+Year-End Target: $3,175 to $7,500
+
+Solana (SOL): The High-Growth Crypto Investors Cannot Ignore
+Man holding a golden Solana coin with the financial stock market graph in the background. Cryptocurrency coin. Financial market.
+
+Speed and cost are Solana's whole pitch. Visa uses Solana for stablecoin settlements. BlackRock expanded its BUIDL fund onto the network. Those are not partnerships that happen by accident.
+
+The more significant development may still be coming. Solana co-founder Anatoly Yakovenko confirmed at Consensus Miami 2026 that the Alpenglow upgrade, the biggest overhaul to the network's consensus mechanism ever built, could hit mainnet by Q3.
+
+Alpenglow cuts transaction finality from about 12.8 seconds to roughly 150 milliseconds. At that speed, Solana stops being a competitor to other blockchains and starts being a competitor to traditional financial infrastructure.
+
+Current Price: $82.21
+
+June 2026 Target: $95 to $107
+
+Year-End Target: $107 to $280
+
+XRP (XRP): A Utility-Driven Asset With Long-Term Potential
+Ripple (XRP) and cryptocurrency investing concept - Physical metal Ripple coins with global trading exchange market price chart in the background.
+
+XRP spent years tied up in an SEC lawsuit that kept institutional money on the sidelines. That case was settled in August 2025, and the regulatory picture has cleared quickly since then.
+
+On May 29, CME Group launched 24/7 XRP futures trading on its regulated derivatives infrastructure, the first time round-the-clock institutional access has been available for XRP. Notional volume on CME's XRP futures had already reached $62.87 billion in the first year before the 24/7 expansion.
+
+From May 20 to May 29, XRP ETFs pulled in $35 million in net inflows, while Bitcoin and Ethereum ETFs collectively lost around $2 billion during the same period. The XRP Ledger has also proposed a DeFi upgrade aimed at adding new liquidity models that could significantly improve capital efficiency on the network. The price has not reflected any of this yet, and that is usually when it is worth paying close attention.
+
+Current Price: $1.34
+
+June 2026 Target: $1.50 to $2.00
+
+Year-End Target: $2.35 to $8.50
+
+Ondo Finance (ONDO): The Leading Real-World Asset Token Gaining Institutional Attention
+Business people with stock market chart financial trading, online investment, stock exchange analysis, market trends, real-time trading data, forex and crypto trading economic forecasting tool
+
+Ondo Finance is doing something most crypto projects talk about, but few deliver: connecting financial assets like US Treasury bonds and stocks to the blockchain so they can be traded on-chain. As of May 2026, Ondo Global Markets has captured more than 70% of the tokenized equity market and surpassed $1 billion in total value locked, the first tokenized stocks platform to hit that mark.
+
+The regulatory backdrop is shifting in its favor. ONDO jumped over 10% in May after reports that the SEC might allow tokenized stock trading. If that approval comes through, it directly unlocks the products Ondo is already built to offer. The token is still well off its all-time high, leaving room for upside if institutional flows pick up.
+
+Current Price: $0.36
+
+June 2026 Target: $0.42 to $0.80
+
+Year-End Target: $1.00 to $3.00
+
+Final Thoughts
+These are the five cryptocurrencies we think have the best upside potential heading into June, but that does not mean any of them are a sure thing. Crypto moves fast in either direction, and prices can reverse just as quickly as they run. Do your own research, know your risk tolerance, and do not size into anything you cannot afford to hold through a rough patch.
+
+
+

@@ -1,0 +1,35 @@
+3 Reasons I'm Nervous About XRP Right Now
+
+The Motley Fool
+
+2026 has been a challenging year for XRP holders.
+
+By Lyle Daly – Jun 2, 2026 at 6:49PM EST
+
+Most of the major cryptocurrencies are well off their all-time highs, including Bitcoin, Ethereum, and XRP (
+XRP
+1.75%
+). Of the three, Bitcoin looks like a good bet to bounce back since it has historically been the most resilient. Ethereum is riskier, but its widespread adoption should help it eventually recover.
+
+XRP, on the other hand, is the one I'm not so sure about. It dropped 29% year to date through the end of May, and there are three reasons I think the decline could continue.
+
+1. The disconnect between Ripple and XRP
+It used to feel like XRP filled a clear role with its issuer, Ripple, which offers a blockchain-based payments network. It designed XRP to provide banks with on-demand liquidity and a bridge currency. A bank can convert its own currency to XRP, send it abroad, and the receiving bank can convert the XRP to its currency. Neither party to the transaction needs to manage foreign currency.
+
+Ripple is one of the hottest private fintech companies. It has over 300 banking partners using its payments network, it's valued at $50 billion, and it's a frequent subject of rumors about an initial public offering -- although management has indicated there are no plans to go public.
+
+XRP hasn't caught on in the same way. Ripple's banking partners can use XRP, but they don't need to, and most don't. Even when XRP is involved in a transaction, it's a quick process, and the banks typically don't hold the cryptocurrency on their balance sheets. Right now, Ripple is the success story, and XRP is turning into an afterthought.
+
+2. Concentration among large-scale holders is higher than it has been in years
+XRP ownership is becoming increasingly concentrated. Last month, Santiment, which provides crypto investment advice, reported that wallets holding at least 10 million XRP held a combined 45.83 billion tokens, an eight-year high. That's well over two-thirds of the current circulating supply of about 62 billion tokens.
+
+When whales hold a large share of the supply, they can significantly impact prices. If a few whales decide to liquidate sizable portions of their XRP holdings, the price could plummet.
+
+3. The regulatory tailwind could be over
+Regulatory issues, specifically a lawsuit between Ripple and the Securities and Exchange Commission (SEC), weighed down XRP's price for years. The crypto's proponents have argued that it will benefit from more regulatory clarity, and there's hope that the CLARITY Act, which sets government guidelines for the digital currency market, could be its next big tailwind.
+
+However, the more likely scenario is that any regulatory benefits for XRP are already priced in. The cryptocurrency skyrocketed after the U.S. presidential election in 2024 based on the belief that the Trump administration would be more crypto-friendly.
+
+That has been the case, but subsequent developments haven't had the same kind of price impact. XRP jumped 11% on Aug. 11, 2025, after the settlement between Ripple and the SEC, but it quickly gave back those gains and has mostly declined since then.
+
+XRP remains an interesting crypto investment, given its ties to one of the top blockchain companies, Ripple. But it has gone through lengthy slumps before, and it hasn't given investors much to get excited about lately. If you own it or are planning to buy any, be prepared for the possibility of an extended downturn.
